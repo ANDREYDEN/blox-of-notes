@@ -7,34 +7,45 @@ contract("Box", function(accounts) {
         return Box.deployed()
             .then(function(instance) {
                 boxInstance = instance
-                candidateId = 1
-                return boxInstance.vote(candidateId, { from: accounts[0] })
-            })
-            .then(function(receipt) {
-                assert.equal(receipt.logs.length, 1, "an event was triggered")
-                assert.equal(
-                    receipt.logs[0].event,
-                    "votedEvent",
-                    "the event type is correct"
-                )
-                assert.equal(
-                    receipt.logs[0].args._candidateId.toNumber(),
-                    candidateId,
-                    "the candidate id is correct"
-                )
-                return electionInstance.voters(accounts[0])
+                boxInstance.submitNote("note", { from: accounts[0] })
+                return boxInstance.voters(accounts[0])
             })
             .then(function(voted) {
-                assert(voted, "the voter was marked as voted")
-                return electionInstance.candidates(candidateId)
+                assert(voted, "the voter was not marked as voted")
+                return boxInstance.numberOfNotes()
             })
-            .then(function(candidate) {
-                var voteCount = candidate[2]
+            .then(function(numberOfNotes) {
+                assert.equal(numberOfNotes, 1, "Number of notes not incremented")
+                return boxInstance.notes(numberOfNotes)
+            })
+            .then(function(note) {
                 assert.equal(
-                    voteCount,
-                    1,
-                    "increments the candidate's vote count"
+                    note,
+                    "note",
+                    "The vote was not received"
                 )
             })
     })
-}
+
+    it("rejects to open before opening time", function () {
+        return true
+    })
+
+    it("opens after opening time", function () {
+        return Box.deployed()
+            .then(function(instance) {
+                boxInstance = instance
+                setTimeout(function() {
+                    boxInstance.open()
+                        .then(function() {
+                            assert(boxInstance.ended, "The ending was not recorded")
+                        })
+                }, 3)
+            })
+            
+    })
+
+    it("rejects submitions after opening time", function () {
+        return true
+    })
+})

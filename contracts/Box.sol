@@ -28,7 +28,7 @@ contract Box {
         notes[numberOfNotes] = note;
     }
 
-    function openBox() public {
+    function open() public {
         require(now >= openingTime, "The submition period is still in progress");
         require(!ended, "The box has already been opened.");
 
