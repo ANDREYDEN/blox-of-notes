@@ -28,67 +28,98 @@ App = {
             App.contracts.Box = TruffleContract(box)
 
             // Connect provider to interact with contract
-            App.contracts.Box.setProvider(App.web3Provider)
-        })
-        $.getJSON("Storage.json", function(box) {
-            // Instantiate a new truffle contract from the artifact
-            App.contracts.Storage = TruffleContract(box)
+            App.contracts.Box.setProvider(
+                App.web3Provider
+            )
 
-            // Connect provider to interact with contract
-            App.contracts.Storage.setProvider(App.web3Provider)
+            $.getJSON("Storage.json", function(storage) {
+                // Instantiate a new truffle contract from the artifact
+                App.contracts.Storage = TruffleContract(storage)
+
+                // Connect provider to interact with contract
+                App.contracts.Storage.setProvider(App.web3Provider)
+
+                return App.render()
+            })
         })
     },
 
     render: function() {
-        $("#loader").show()
+        console.log("rendering...")
+        $("#loader").hide()
         $("#create-note").hide()
-        $("#create-box").hide()
-        $("#any-expired-opened").hide()
+        $("#create-box").show()
+        $("#boxes-and-notes").show()
         $("#voter-expired-closed").hide()
         $("#creator-expired-closed").hide()
         $("#any-running-closed").hide()
+        $("#loader").show()
 
         // Load account data
         web3.eth.getCoinbase(function(err, account) {
             if (err === null) {
                 App.account = account
-                $("#account-address").html("Your Account: " + account)
+                $("#account-address").html(
+                    "Your Account: " + account
+                )
             }
         })
 
-        var boxInstance, boxOpeningTime
+        var storageInstance, boxInstance, boxOpeningTime
         // render different views for different scenarios
-        App.contracts.Box.deployed()
+        App.contracts.Storage.deployed()
             .then(function(instance) {
-                boxInstance = instance
+                storageInstance = instance
                 $("#loader").hide()
-                
-                return boxInstance.openingTime()
+                $("#results").empty();
+                $("#results").append(
+                    "<tr><th>Note submited</th><th>Box Title</th><th>Box Address</th><th>Info</th></tr>"
+                )
+                return storageInstance.voterBoxCount(App.account)
             })
-            .then(function (openingTime) {
-                boxOpeningTime = openingTime.c[0]
-                var x = setInterval(() => {
-                    let countdown = $("#countdown")
-                    countdown.empty()
-                    let timeString = getTimeDelta(boxOpeningTime)
-                    if (timeString === "") {
-                        clearInterval(x)
-                        if ((Date.now() / 1000) - boxOpeningTime < 1) App.render()
-                    } else {
-                        countdown.append(timeString)
-                    }
-                }, 1000)
-                return boxInstance.voters(App.account)
-            })
-            .then(function(voted) {
-                if (boxOpeningTime <= (Date.now() / 1000)) {
-                    $("#any-expired-opened").show()
-                } else {
-                    if (voted) {
-                        $("#any-running-closed").show()
-                    } else {
-                        $("#create-note").show()
-                    }
+            .then(function(boxCount) {
+                console.log("Box Count:", boxCount)
+                for (let b = 1; b <= boxCount.c[0]; b++) {
+                    var boxAddr, boxCountdown, theNote
+                    console.log(storageInstance)
+                    storageInstance.getMyBox(b, { from: App.account})
+                        .then(function(boxAddress) {
+                            console.log(boxAddress)
+                            boxAddr = boxAddress
+                            return storageInstance.getBoxOpeningTime(b, {
+                                from: App.account
+                            })
+                        })
+                        .then(function (openingTime) {
+                            // update countdown
+                            boxOpeningTime = openingTime.c[0]
+                            boxCountdown = getTimeDelta(boxOpeningTime)
+                            var x = setInterval(() => {
+                                let countdown = $(`#countdown${b}`)
+                                countdown.empty()
+                                let timeString = getTimeDelta(boxOpeningTime)
+                                if (timeString === "") {
+                                    clearInterval(x)
+                                    //if ((Date.now() / 1000) - boxOpeningTime < 1) App.render()
+                                } else {
+                                    countdown.append(timeString)
+                                }
+                            }, 1000)
+
+                            return storageInstance.getBoxIndividualNote(b, {
+                                from: App.account
+                            })
+                        })
+                        .then(function(note) {
+                            theNote = note
+                            return storageInstance.getBoxTitle(b, { from: App.account })
+                        })
+                        .then(function(title) {
+                            $("#results").append(`<tr><td>${theNote}</td><td>${title}</td><td>${boxAddr}</td><td id="countdown${b}">${boxCountdown}</td></tr>`)
+                        })
+                        .catch(function(error) {
+                            console.error(error)
+                        })
                 }
             })
             .catch(function(error) {
@@ -99,12 +130,13 @@ App = {
     createBox: function() {
         var title = $("#title").val()
         var lifetime = $("#lifetime").val()
-        console.log(title, lifetime)
-        App.contracts.Box.deployed()
-            .then(function(instance) {
-                return instance.deployBox(title, lifetime)
+        App.contracts.Storage.deployed()
+            .then(function(storageInstance) {
+                return storageInstance.deployBox(title, Date.now() / 1000 + lifetime*1, {
+                    from: App.account
+                })
             })
-            .then(function(result) {
+            .then(function() {
                 App.render()
             })
             .catch(function(err) {
@@ -114,24 +146,14 @@ App = {
     },
 
     submitNote: function() {
-        var storageInstance, boxInstance
         App.contracts.Storage.deployed()
-            .then(function(instance) {
-                storageInstance = instance
-                return instance.submitNote($("#note").val(), $("#box-address").val(), {
+            .then(function(storageInstance) {
+                return storageInstance.submitNote($("#note").val(), $("#box-address").val(), {
                     from: App.account
                 })
             })
-            .then(function(result) {
-                return boxInstance.openingTime()
-            })
-            .then(function (openingTime) {
-                $("#create-note").hide()
-                if (openingTime.c[0] <= Date.now() / 1000) {
-                    $("any-expired-opened").show()
-                } else {
-                    $("any-running-closed").show()
-                }
+            .then(function() {
+                App.render()
             })
             .catch(function(err) {
                 console.error(err)
@@ -155,8 +177,6 @@ function getTimeDelta (countDownDate) {
     )
     var minutes = Math.floor((distance % 3600) / 60)
     var seconds = Math.floor((distance % 60))
-    
-    console.log(now, countDownDate, distance)
 
     return (distance < 0) ? "" : `${days}d ${hours}hrs ${minutes}min ${seconds}s`;
 }
@@ -164,12 +184,5 @@ function getTimeDelta (countDownDate) {
 $(function() {
     $(window).load(function() {
         App.init()
-        $("#loader").hide()
-        $("#create-note").show()
-        $("#create-box").show()
-        $("#boxes-and-notes").show()
-        $("#voter-expired-closed").hide()
-        $("#creator-expired-closed").hide()
-        $("#any-running-closed").hide()
     })
 })

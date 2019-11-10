@@ -7,57 +7,85 @@ contract Box {
     uint public numberOfNotes;
     address creator;
 
-    mapping(address => bool) public voters;
-    mapping(uint => string) public notes;
+    mapping(address => bool) public voted;
+    mapping(uint => string) notes;
+    mapping(address => string) voterNote;
 
-    constructor (uint _id, string memory _title, uint _lifetime) public {
+    constructor (uint _id, string memory _title, uint _openingTime, address _creator) public {
         id = _id;
         title = _title;
-        openingTime = now + _lifetime;
-        creator = msg.sender;
+        openingTime = _openingTime;
+        creator = _creator;
     }
 
-    function submitNote(string memory note) public {
-        require(!voters[msg.sender], "You can't submit more than once");
+    function submitNote(string memory note, address sender) public {
+        require(!voted[sender], "You can't submit more than once");
         require(now <= openingTime, "The box has already been opened");
 
         // record the submition
-        voters[msg.sender] = true;
+        voted[sender] = true;
 
         // record the submited note
         numberOfNotes++;
         notes[numberOfNotes] = note;
+        voterNote[sender] = note;
     }
 
     function getNote(uint noteNumber) public view returns (string memory) {
         require(now > openingTime, "The box is still closed");
         return notes[noteNumber];
     }
+
+    function getIndividualNote(address sender) public view returns (string memory) {
+        if (sender == creator) {
+            return "<Creator>";
+        }
+        require(voted[sender], "You have not yet voted");
+        return voterNote[sender];
+    }
 }
 
 contract Storage {
-    mapping(address => uint) voterBoxCount;
-    mapping(address => mapping(uint => Box)) voterBoxes;
-    mapping(address => Box) boxes;
+    mapping(address => uint) public voterBoxCount;
+    mapping(address => mapping(uint => Box)) public voterBoxes;
+    mapping(address => Box) public boxes;
     mapping(address => bool) boxExists;
-    mapping(address => uint) voterNoteCount;
-    mapping(address => mapping(uint => string)) voterNotes;
 
-    function deployBox(string memory title, uint lifetime) public {
+    function deployBox(string memory title, uint openTime) public {
         voterBoxCount[msg.sender]++;
         uint boxCount = voterBoxCount[msg.sender];
-        Box box = new Box(boxCount, title, lifetime);
+
+        Box box = new Box(boxCount, title, openTime, msg.sender);
         voterBoxes[msg.sender][boxCount] = box;
         boxes[address(box)] = box;
         boxExists[address(box)] = true;
     }
 
+    function getMyBox(uint id) public view returns (Box) {
+        return voterBoxes[msg.sender][id];
+    }
+
     function submitNote(string memory note, address boxAddress) public {
         require(boxExists[boxAddress], "The box doesn't exist");
         Box box = boxes[boxAddress];
-        box.submitNote(note);
+        box.submitNote(note, msg.sender);
 
-        voterNoteCount[msg.sender]++;
-        voterNotes[msg.sender][voterNoteCount[msg.sender]] = note;
+        voterBoxCount[msg.sender]++;
+        voterBoxes[msg.sender][voterBoxCount[msg.sender]] = box;
+    }
+
+    function getBoxOpeningTime(uint id) public view returns (uint) {
+        //require(id > 0 && id < voterBoxCount[msg.sender], "Id is not valid");
+        return voterBoxes[msg.sender][id].openingTime();
+    }
+
+    function getBoxTitle(uint id) public view returns (string memory) {
+        //require(id > 0 && id < voterBoxCount[msg.sender], "Id is not valid");
+        return voterBoxes[msg.sender][id].title();
+    }
+
+    function getBoxIndividualNote(uint id) public view returns (string memory) {
+        //require(id > 0 && id < voterBoxCount[msg.sender], "Id is not valid");
+        return voterBoxes[msg.sender][id].getIndividualNote(msg.sender);
     }
 }
