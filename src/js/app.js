@@ -29,8 +29,13 @@ App = {
 
             // Connect provider to interact with contract
             App.contracts.Box.setProvider(App.web3Provider)
+        })
+        $.getJSON("Storage.json", function(box) {
+            // Instantiate a new truffle contract from the artifact
+            App.contracts.Storage = TruffleContract(box)
 
-            //App.listenForEvents()
+            // Connect provider to interact with contract
+            App.contracts.Storage.setProvider(App.web3Provider)
         })
     },
 
@@ -38,7 +43,7 @@ App = {
         $("#loader").show()
         $("#create-note").hide()
         $("#create-box").hide()
-        $("#any-expired-open").hide()
+        $("#any-expired-opened").hide()
         $("#voter-expired-closed").hide()
         $("#creator-expired-closed").hide()
         $("#any-running-closed").hide()
@@ -77,7 +82,7 @@ App = {
             })
             .then(function(voted) {
                 if (boxOpeningTime <= (Date.now() / 1000)) {
-                    $("#any-expired-open").show()
+                    $("#any-expired-opened").show()
                 } else {
                     if (voted) {
                         $("#any-running-closed").show()
@@ -109,11 +114,11 @@ App = {
     },
 
     submitNote: function() {
-        var boxInstance
-        App.contracts.Box.deployed()
+        var storageInstance, boxInstance
+        App.contracts.Storage.deployed()
             .then(function(instance) {
-                boxInstance = instance
-                return instance.submitNote($("#note").val(), {
+                storageInstance = instance
+                return instance.submitNote($("#note").val(), $("#box-address").val(), {
                     from: App.account
                 })
             })
@@ -123,7 +128,7 @@ App = {
             .then(function (openingTime) {
                 $("#create-note").hide()
                 if (openingTime.c[0] <= Date.now() / 1000) {
-                    $("any-expired-open").show()
+                    $("any-expired-opened").show()
                 } else {
                     $("any-running-closed").show()
                 }
@@ -133,15 +138,8 @@ App = {
             })
     },
 
-    openBox: function() {
-        App.contracts.Box.deployed()
-            .then(function(instance) {
-                return instance.open()
-            })
-            .then(function(result) {
-                $("any-expired-open").show()
-                // TODO: render notes
-            })
+    showNotes: function() {
+        // TODO: render notes to pop-up
     }
 }
 
@@ -167,9 +165,9 @@ $(function() {
     $(window).load(function() {
         App.init()
         $("#loader").hide()
-        $("#create-note").hide()
+        $("#create-note").show()
         $("#create-box").show()
-        $("#any-expired-open").hide()
+        $("#boxes-and-notes").show()
         $("#voter-expired-closed").hide()
         $("#creator-expired-closed").hide()
         $("#any-running-closed").hide()

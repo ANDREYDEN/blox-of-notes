@@ -33,16 +33,6 @@
           </form>
       </div>
 
-      <div id="create-box">
-        <form onSubmit="App.createBox(); return false;">
-          <label for="title">Title:</label><br>
-          <input id="title" type="text" name="title"><br>
-          <label for="lifetime">Seconds:</label><br>
-          <input id="lifetime" type="text" name="lifetime"><br>
-          <button type="submit">Submit</button>
-        </form>
-      </div>
-
       <div id="create-note">
         <form onSubmit="App.submitNote(); return false;">
           <div class="images">
@@ -52,12 +42,14 @@
             <img src= "pictures/receivingbox.png" alt=”ballot-box”/>
           </div>
           <label class="normal-text" for="note">Enter Note:</label><br>
-          <input type="text" name="note"><br>
+          <input type="text" id="note" name="note"><br>
+          <label class="normal-text" for="note">Box Address:</label><br>
+          <input type="text" id="box-address" name="note"><br>
           <button type="submit">Submit</button>
         </form>
       </div>
       
-      <div id="box-closed">
+      <div id="any-running-closed">
         <p class="normal-text">Submitted! Box will open in:</p>
         <div class="images">
           <img src= "pictures/CloseBox.png" alt=”closed-box”/>
@@ -72,7 +64,7 @@
           </div>
       </div>
 
-      <div id="owner-expired-closed">
+      <div id="creator-expired-closed">
           <form onSubmit="App.openBox(); return false;">
           <p class="normal-text">Time's up! Open the box!</p>
           <div class="images">
@@ -82,13 +74,13 @@
         </form>
       </div>
       
-      <div id="box-opened">
+      <div id="boxes-and-notes">
           <p class="normal-text">Here are your notes!</p>
           <div class="images">
             <img src= "pictures/OpenBox.png" alt=”opened-box”/>
           </div>
           <div>
-              <table id="table">
+              <table id="results">
                   <tr>
                     <th class="normal-text">Notes</th>
                   </tr>
