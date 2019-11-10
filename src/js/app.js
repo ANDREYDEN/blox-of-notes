@@ -46,10 +46,6 @@ App = {
 
     render: function() {
         console.log("rendering...")
-        $("#loader").hide()
-        $("#create-note").hide()
-        $("#create-box").show()
-        $("#boxes-and-notes").show()
         $("#voter-expired-closed").hide()
         $("#creator-expired-closed").hide()
         $("#any-running-closed").hide()
@@ -73,7 +69,7 @@ App = {
                 $("#loader").hide()
                 $("#results").empty();
                 $("#results").append(
-                    "<tr><th>Note submited</th><th>Box Title</th><th>Box Address</th><th>Info</th></tr>"
+                    '<tr><th class="tg-baqh">Note submited</th><th class="tg-baqh">Box Title</th><th class="tg-baqh">Box Address</th><th class="tg-baqh">Info</th></tr>'
                 )
                 return storageInstance.voterBoxCount(App.account)
             })
