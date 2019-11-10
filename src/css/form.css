@@ -1,0 +1,19 @@
+form {
+    border: 1px solid red;
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    align-self: flex-start;
+}
+
+button {
+  position: relative;
+  background-color:  #B8C5F2;
+  border: 1px solid #B8C5F2;
+  box-sizing: border-box;
+  align-self: center;
+}
+
+input[type=text] {
+    height :
+}

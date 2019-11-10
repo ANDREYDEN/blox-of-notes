@@ -38,7 +38,7 @@ contract("Box", function(accounts) {
                 setTimeout(function() {
                     boxInstance.open()
                         .then(function() {
-                            assert(boxInstance.ended, "The ending was not recorded")
+                            assert(boxInstance.opened, "The ending was not recorded")
                         })
                 }, 3)
             })

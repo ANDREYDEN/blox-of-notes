@@ -23,11 +23,12 @@ App = {
     },
 
     initContract: function() {
-        $.getJSON("Election.json", function(election) {
+        $.getJSON("Box.json", function(box) {
             // Instantiate a new truffle contract from the artifact
-            App.contracts.Election = TruffleContract(election)
+            App.contracts.Box = TruffleContract(box)
+
             // Connect provider to interact with contract
-            App.contracts.Election.setProvider(App.web3Provider)
+            App.contracts.Box.setProvider(App.web3Provider)
 
             App.listenForEvents()
 
@@ -36,76 +37,51 @@ App = {
     },
 
     render: function() {
-        var electionInstance
         var loader = $("#loader")
-        var content = $("#content")
-
+        var createNote = $("#create-note")
+        var openBox = $("#box-opened")
+        var closedBox = $("#box-closed")
+        
         loader.show()
-        content.hide()
+        createNote.hide()
+        openBox.hide()
+        closedBox.hide()
 
         // Load account data
         web3.eth.getCoinbase(function(err, account) {
             if (err === null) {
                 App.account = account
-                $("#accountAddress").html("Your Account: " + account)
+                $("#account-address").html("Your Account: " + account)
             }
         })
-
+        
+        var boxInstance
         // Load contract data
-        App.contracts.Election.deployed()
+        App.contracts.Box.deployed()
             .then(function(instance) {
-                electionInstance = instance
-                return electionInstance.candidatesCount()
-            })
-            .then(function(candidatesCount) {
-                var candidatesResults = $("#candidatesResults")
-                candidatesResults.empty()
-
-                var candidatesSelect = $("#candidatesSelect")
-                candidatesSelect.empty()
-
-                for (var i = 1; i <= candidatesCount; i++) {
-                    electionInstance.candidates(i).then(function(candidate) {
-                        console.log(candidate)
-                        var id = candidate[0]
-                        var name = candidate[1]
-                        var voteCount = candidate[2]
-
-                        // Render candidate Result
-                        var candidateTemplate =
-                            "<tr><th>" +
-                            id +
-                            "</th><td>" +
-                            name +
-                            "</td><td>" +
-                            voteCount +
-                            "</td></tr>"
-                        candidatesResults.append(candidateTemplate)
-
-                        // Render candidate ballot option
-                        var candidateOption =
-                            "<option value='" + id + "' >" + name + "</ option>"
-                        candidatesSelect.append(candidateOption)
-                    })
-                }
-                return electionInstance.voters(App.account)
-            })
-            .then(function(hasVoted) {
-                // Do not allow a user to vote
-                if (hasVoted) {
-                    $("form").hide()
-                }
+                boxInstance = instance
                 loader.hide()
-                content.show()
+                return boxInstance.voters(App.account)
+            })
+            .then(function(voted) {
+                if (boxInstance.opened) {
+                    openBox.show()
+                } else {
+                    if (voted) {
+                        closedBox.show()
+                    } else {
+                        createNote.show()
+                    }
+                }
             })
             .catch(function(error) {
-                console.warn(error)
+                console.error(error)
             })
     },
 
-    castVote: function() {
+    submitNote: function() {
         var candidateId = $("#candidatesSelect").val()
-        App.contracts.Election.deployed()
+        App.contracts.Box.deployed()
             .then(function(instance) {
                 return instance.vote(candidateId, { from: App.account })
             })
@@ -120,26 +96,50 @@ App = {
     },
 
     listenForEvents: function() {
-        App.contracts.Election.deployed().then(function(instance) {
+        App.contracts.Box.deployed().then(function(instance) {
             instance
-                .votedEvent(
-                    {},
-                    {
+                .BoxOpened({
                         fromBlock: 0,
                         toBlock: "latest"
-                    }
-                )
+                    })
                 .watch(function(error, event) {
-                    console.log("event triggered", event)
-                    // Reload when a new vote is recorded
-                    App.render()
+                    // react to event
                 })
         })
     },
 }
 
+function getTimeDelta (countDownDate) {
+    var now = new Date().getTime()
+
+    var distance = countDownDate - now
+
+    // Time calculations for days, hours, minutes and seconds
+    var days = Math.floor(distance / (1000 * 60 * 60 * 24))
+    var hours = Math.floor(
+        (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    )
+    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
+    var seconds = Math.floor((distance % (1000 * 60)) / 1000)
+    
+    // If the count down is over, write some text
+    if (distance < 0) {
+        clearInterval(x)
+        return "The Box is Ready to Open!"
+    }
+
+    return `${days}d ${hours}hrs ${minutes}min ${seconds}s`;
+}
+
 $(function() {
     $(window).load(function() {
         App.init()
+        setInterval(() => {
+            let countdown = $("#countdown")
+            countdown.empty()
+            countdown.append(
+                getTimeDelta(new Date("Dec 8, 2019 15:37:25").getTime())
+            )
+        }, 1000)
     })
 })
