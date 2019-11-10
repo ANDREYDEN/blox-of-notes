@@ -30,22 +30,18 @@ App = {
             // Connect provider to interact with contract
             App.contracts.Box.setProvider(App.web3Provider)
 
-            App.listenForEvents()
-
-            return App.render()
+            //App.listenForEvents()
         })
     },
 
     render: function() {
-        var loader = $("#loader")
-        var createNote = $("#create-note")
-        var openBox = $("#box-opened")
-        var closedBox = $("#box-closed")
-        
-        loader.show()
-        createNote.hide()
-        openBox.hide()
-        closedBox.hide()
+        $("#loader").show()
+        $("#create-note").hide()
+        $("#create-box").hide()
+        $("#any-expired-open").hide()
+        $("#voter-expired-closed").hide()
+        $("#creator-expired-closed").hide()
+        $("#any-running-closed").hide()
 
         // Load account data
         web3.eth.getCoinbase(function(err, account) {
@@ -54,23 +50,39 @@ App = {
                 $("#account-address").html("Your Account: " + account)
             }
         })
-        
-        var boxInstance
-        // Load contract data
+
+        var boxInstance, boxOpeningTime
+        // render different views for different scenarios
         App.contracts.Box.deployed()
             .then(function(instance) {
                 boxInstance = instance
-                loader.hide()
+                $("#loader").hide()
+                
+                return boxInstance.openingTime()
+            })
+            .then(function (openingTime) {
+                boxOpeningTime = openingTime.c[0]
+                var x = setInterval(() => {
+                    let countdown = $("#countdown")
+                    countdown.empty()
+                    let timeString = getTimeDelta(boxOpeningTime)
+                    if (timeString === "") {
+                        clearInterval(x)
+                        if ((Date.now() / 1000) - boxOpeningTime < 1) App.render()
+                    } else {
+                        countdown.append(timeString)
+                    }
+                }, 1000)
                 return boxInstance.voters(App.account)
             })
             .then(function(voted) {
-                if (boxInstance.opened) {
-                    openBox.show()
+                if (boxOpeningTime <= (Date.now() / 1000)) {
+                    $("#any-expired-open").show()
                 } else {
                     if (voted) {
-                        closedBox.show()
+                        $("#any-running-closed").show()
                     } else {
-                        createNote.show()
+                        $("#create-note").show()
                     }
                 }
             })
@@ -79,67 +91,87 @@ App = {
             })
     },
 
-    submitNote: function() {
-        var candidateId = $("#candidatesSelect").val()
+    createBox: function() {
+        var title = $("#title").val()
+        var lifetime = $("#lifetime").val()
+        console.log(title, lifetime)
         App.contracts.Box.deployed()
             .then(function(instance) {
-                return instance.vote(candidateId, { from: App.account })
+                return instance.deployBox(title, lifetime)
             })
             .then(function(result) {
-                // Wait for votes to update
-                $("#content").hide()
-                $("#loader").show()
+                App.render()
+            })
+            .catch(function(err) {
+                console.error(err)
+            })
+        return false
+    },
+
+    submitNote: function() {
+        var boxInstance
+        App.contracts.Box.deployed()
+            .then(function(instance) {
+                boxInstance = instance
+                return instance.submitNote($("#note").val(), {
+                    from: App.account
+                })
+            })
+            .then(function(result) {
+                return boxInstance.openingTime()
+            })
+            .then(function (openingTime) {
+                $("#create-note").hide()
+                if (openingTime.c[0] <= Date.now() / 1000) {
+                    $("any-expired-open").show()
+                } else {
+                    $("any-running-closed").show()
+                }
             })
             .catch(function(err) {
                 console.error(err)
             })
     },
 
-    listenForEvents: function() {
-        App.contracts.Box.deployed().then(function(instance) {
-            instance
-                .BoxOpened({
-                        fromBlock: 0,
-                        toBlock: "latest"
-                    })
-                .watch(function(error, event) {
-                    // react to event
-                })
-        })
-    },
+    openBox: function() {
+        App.contracts.Box.deployed()
+            .then(function(instance) {
+                return instance.open()
+            })
+            .then(function(result) {
+                $("any-expired-open").show()
+                // TODO: render notes
+            })
+    }
 }
 
 function getTimeDelta (countDownDate) {
-    var now = new Date().getTime()
+    var now = new Date().getTime() / 1000
 
     var distance = countDownDate - now
 
     // Time calculations for days, hours, minutes and seconds
-    var days = Math.floor(distance / (1000 * 60 * 60 * 24))
+    var days = Math.floor(distance / (3600 * 24))
     var hours = Math.floor(
-        (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        (distance % (3600 * 24)) / 3600
     )
-    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
-    var seconds = Math.floor((distance % (1000 * 60)) / 1000)
+    var minutes = Math.floor((distance % 3600) / 60)
+    var seconds = Math.floor((distance % 60))
     
-    // If the count down is over, write some text
-    if (distance < 0) {
-        clearInterval(x)
-        return "The Box is Ready to Open!"
-    }
+    console.log(now, countDownDate, distance)
 
-    return `${days}d ${hours}hrs ${minutes}min ${seconds}s`;
+    return (distance < 0) ? "" : `${days}d ${hours}hrs ${minutes}min ${seconds}s`;
 }
 
 $(function() {
     $(window).load(function() {
         App.init()
-        setInterval(() => {
-            let countdown = $("#countdown")
-            countdown.empty()
-            countdown.append(
-                getTimeDelta(new Date("Dec 8, 2019 15:37:25").getTime())
-            )
-        }, 1000)
+        $("#loader").hide()
+        $("#create-note").hide()
+        $("#create-box").show()
+        $("#any-expired-open").hide()
+        $("#voter-expired-closed").hide()
+        $("#creator-expired-closed").hide()
+        $("#any-running-closed").hide()
     })
 })

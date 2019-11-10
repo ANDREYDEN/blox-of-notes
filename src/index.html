@@ -20,20 +20,30 @@
         <h3 class="loading">Loading...</h3>
       </div>
 
+      <div id="create-box">
+        <form onSubmit="App.createBox(); return false;">
+          <label for="title">Title:</label><br>
+          <input id="title" type="text" name="title"><br>
+          <label for="lifetime">Seconds:</label><br>
+          <input id="lifetime" type="text" name="lifetime"><br>
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+
       <div id="create-note">
         <form onSubmit="App.submitNote(); return false;">
           <label for="note">Enter Note:</label><br>
-          <input type="text" name="note"><br>
+          <input id="note" type="text" name="note"><br>
           <button type="submit">Submit</button>
         </form>
       </div>
       
-      <div id="box-closed">
+      <div id="any-running-closed">
         <p id="countdown"></p>
       </div>
       
-      <div id="box-opened">
-        
+      <div id="any-expired-open">
+        TADA
       </div>
     </main>
     

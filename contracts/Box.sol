@@ -4,16 +4,15 @@ contract Box {
     string public title;
     uint public openingTime;
     uint public numberOfNotes;
-    bool opened;
+    address creator;
 
     mapping(address => bool) public voters;
     mapping(uint => string) public notes;
 
-    event BoxOpened();
-
-    constructor(uint _lifetime, string memory _title) public {
-        openingTime = now + _lifetime;
+    function deployBox(string memory _title, uint _lifetime) public {
         title = _title;
+        openingTime = now + _lifetime;
+        creator = msg.sender;
     }
 
     function submitNote(string memory note) public {
@@ -28,11 +27,10 @@ contract Box {
         notes[numberOfNotes] = note;
     }
 
-    function open() public {
-        require(now >= openingTime, "The submition period is still in progress");
-        require(!opened, "The box has already been opened.");
-
-        opened = true;
-        emit BoxOpened();
-    }
+    // function open() public {
+    //     require(now >= openingTime, "The submition period is still in progress");
+    //     require(!opened, "The box has already been opened.");
+    //     require(msg.sender, creator, "Only the creator can open the box");
+    //     opened = true;
+    // }
 }
