@@ -4,7 +4,7 @@ contract Box {
     string public title;
     uint public openingTime;
     uint public numberOfNotes;
-    bool ended;
+    bool opened;
 
     mapping(address => bool) public voters;
     mapping(uint => string) public notes;
@@ -30,9 +30,9 @@ contract Box {
 
     function open() public {
         require(now >= openingTime, "The submition period is still in progress");
-        require(!ended, "The box has already been opened.");
+        require(!opened, "The box has already been opened.");
 
-        ended = true;
+        opened = true;
         emit BoxOpened();
     }
 }
