@@ -17,23 +17,79 @@
 
     <main>
       <div id="loader">
-        <h3 class="loading">Loading...</h3>
+        <h3 class="normal-text">Loading...</h3>
+      </div>
+
+      <div id="create-box">
+          <form onSubmit="App.createBox(); return false;">
+            <div  class="images">
+              <img id="boxnet" src= "pictures/boxnet.png" alt=”net-of-box”/>
+            </div>
+            <label class="normal-text" for="title">Title:</label><br>
+            <input type="text" id="title" name="title"><br>
+            <label class="normal-text" for="lifetime">Number of seconds until opening:</label><br>
+            <input type="text" id="lifetime" name="lifetime"><br>
+            <button type="submit">Submit</button>
+          </form>
       </div>
 
       <div id="create-note">
         <form onSubmit="App.submitNote(); return false;">
-          <label for="note">Enter Note:</label><br>
+          <div class="images">
+            <img src= "pictures/ballot.png" alt=”note”/><br>
+          </div>
+          <div class="images">
+            <img src= "pictures/receivingbox.png" alt=”ballot-box”/>
+          </div>
+          <label class="normal-text" for="note">Enter Note:</label><br>
           <input type="text" name="note"><br>
           <button type="submit">Submit</button>
         </form>
       </div>
       
       <div id="box-closed">
-        <p id="countdown"></p>
+        <p class="normal-text">Submitted! Box will open in:</p>
+        <div class="images">
+          <img src= "pictures/CloseBox.png" alt=”closed-box”/>
+        </div>
+        <p class= "countdown" id="countdown"></p>
+      </div>
+      
+      <div id="voter-expired-closed">
+          <p class="normal-text">Time's up! Please contact the Owner to open the box!</p>
+          <div class="images">
+            <img src= "pictures/CloseBox.png" alt=”closed-box”/>
+          </div>
+      </div>
+
+      <div id="owner-expired-closed">
+          <form onSubmit="App.openBox(); return false;">
+          <p class="normal-text">Time's up! Open the box!</p>
+          <div class="images">
+            <img src= "pictures/CloseBox.png" alt=”closed-box”/><br>
+          </div>
+          <button type="submit">Open</button>
+        </form>
       </div>
       
       <div id="box-opened">
-        
+          <p class="normal-text">Here are your notes!</p>
+          <div class="images">
+            <img src= "pictures/OpenBox.png" alt=”opened-box”/>
+          </div>
+          <div>
+              <table id="table">
+                  <tr>
+                    <th class="normal-text">Notes</th>
+                  </tr>
+                  <tr>
+                    <td class="note-text">I have a lot to say and I will say it!</td>
+                  </tr>
+                  <tr>
+                    <td class="note-text">The service was excellent!</td>
+                  </tr>
+                </table>
+          </div>
       </div>
     </main>
     

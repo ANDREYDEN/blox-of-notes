@@ -42,10 +42,10 @@ App = {
         var openBox = $("#box-opened")
         var closedBox = $("#box-closed")
         
-        loader.show()
-        createNote.hide()
-        openBox.hide()
-        closedBox.hide()
+        //loader.show()
+        //createNote.hide()
+        //openBox.hide()
+        //closedBox.hide()
 
         // Load account data
         web3.eth.getCoinbase(function(err, account) {
