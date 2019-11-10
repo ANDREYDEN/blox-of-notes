@@ -16,17 +16,30 @@ main {
   font-family: Arial, Helvetica, sans-serif;
   font-style: normal;
   font-weight: normal;
-  color: #000000;
+  color: #E3A503;
   text-align: center;
   margin: auto;   
 }
 
-#loader {
+/*Used for "Enter Note:", "SUBMITTED! Box will open in:", ALL User created notes*/
+.normal-text {
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    color: #E3A503;
+    text-align: center;
+    font-size: 24px;
+    margin: auto;
+}
+/*Used for "Submit", "Loading", "Here are your notes" */
+.note-text {
   position: relative;
   font-family: Arial, Helvetica, sans-serif;
   font-style: normal;
   font-weight: normal;
+  color: #39414f;
   text-align: center;
+  font-size: 18px;
   margin: auto;
 }
 
@@ -35,9 +48,40 @@ main {
   font-family: Arial, Helvetica, sans-serif;
   font-style: normal;
   font-weight: normal;
+  color: #6A5F44;
   text-align: center;
+  font-size: 60px;
+  line-height: 0px;
 }
 
+#box-closed {
+    width: 100%;
+    border: 1px solid red;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.images {
+   object-fit: cover;
+   display: flex;
+   justify-content: center;
+}
+
+#boxnet {
+  object-fit: cover;
+  justify-content: center;
+  width: 50%;
+    height: auto;
+}
+
+#table {
+    border-collapse: collapse;
+    width: 100%;
+    padding: 8px;
+    text-align: center;
+}
+  
 #account-address {
   text-align: center;
 }
