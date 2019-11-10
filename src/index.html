@@ -5,14 +5,15 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Election Results</title>
+    <title>Blox of Notes</title>
+    <link href="https://fonts.googleapis.com/css?family=Rationale&display=swap" rel="stylesheet">
     <link href="css/main.css" rel="stylesheet">
     <link href="css/form.css" rel="stylesheet">
   </head>
 
   <body>
     <header>
-      <h1 class="main-title">BLOX OF NOTES</h1>
+        <img style="width: 35%; height:auto; margin: auto;" class="images" src= "pictures/Headerlogo.png" alt=”header-logo”/>
     </header>
 
     <main>
@@ -20,34 +21,42 @@
         <h3 class="normal-text">Loading...</h3>
       </div>
 
-      <div id="create-box">
-          <form onSubmit="App.createBox(); return false;">
-            <div  class="images">
-              <img id="boxnet" src= "pictures/boxnet.png" alt=”net-of-box”/>
-            </div>
-            <label class="normal-text" for="title">Title:</label><br>
-            <input type="text" id="title" name="title"><br>
-            <label class="normal-text" for="lifetime">Number of seconds until opening:</label><br>
-            <input type="text" id="lifetime" name="lifetime"><br>
-            <button type="submit">Submit</button>
-          </form>
-      </div>
+      <section class="container">
+        <div class="left" id="create-box">
+            <p class= "subtitles">CREATE NEW BOX</p>
+            <form onSubmit="App.createBox(); return false;">
+              <div>
+                <img id="boxnet" src= "pictures/boxnet.png" alt=”net-of-box”/>
+              </div>
+              <label style="color: #39414f;" class="normal-text" for="title">Title:</label><br>
+              <input type="text" id="title" name="title"><br>
+              <label style="color: #39414f;" class="normal-text" for="lifetime">Number of seconds until opening:</label><br>
+              <input type="text" id="lifetime" name="lifetime"><br>
+              <button type="submit">Submit</button>
+            </form>
+        </div>
+        <div class="right" id="create-note">
+            <p class= "subtitles">SUBMIT NOTE TO EXISTING BOX</p>
+            <form onSubmit="App.submitNote(); return false;">
+              <div>
+                <div class="images">
+                    <img style="width: 9%; height: 9%;" src= "pictures/ballot.png" alt=”note”/><br>
+                  </div>
+                  <div class="images">
+                    <img style="width: 43%; height: 43%;" src= "pictures/receivingbox.png" alt=”ballot-box”/>
+                  </div><br>
+              </div>
+              <label style="color: #39414f;" class="normal-text" for="note">Enter Note:</label><br>
+              <input type="text" id="note" name="note"><br>
+              <label style="color: #39414f;" class="normal-text" for="note">Box Address:</label><br>
+              <input type="text" id="box-address" name="note"><br>
+              <button type="submit">Submit</button>
+            </form>
+          </div>
+      </section>
 
-      <div id="create-note">
-        <form onSubmit="App.submitNote(); return false;">
-          <div class="images">
-            <img src= "pictures/ballot.png" alt=”note”/><br>
-          </div>
-          <div class="images">
-            <img src= "pictures/receivingbox.png" alt=”ballot-box”/>
-          </div>
-          <label class="normal-text" for="note">Enter Note:</label><br>
-          <input type="text" id="note" name="note"><br>
-          <label class="normal-text" for="note">Box Address:</label><br>
-          <input type="text" id="box-address" name="note"><br>
-          <button type="submit">Submit</button>
-        </form>
-      </div>
+      
+
       
       <div id="any-running-closed">
         <p class="normal-text">Submitted! Box will open in:</p>
@@ -87,6 +96,46 @@
           </div>
       </div>
     </main>
+
+    <div>
+      <table style="border: 1px solid #E3A503;" style="margin-top:50px;" class="tg">
+          <tr>
+            <th class="tg-baqh">Note Submitted</th>
+            <th class="tg-baqh">Box</th>
+            <th class="tg-baqh">Box Address</th>
+            <th class="tg-baqh">Countdown</th>
+            <th class="tg-baqh"></th>
+          </tr>
+          <tr>
+            <td class="tg-hmp3">Blah blah blah</td>
+            <td class="tg-hmp3">My Fave Box</td>
+            <td class="tg-hmp3"></td>
+            <td class="tg-baqh">*countdown*</td>
+            <td class="tg-baqh"></td>
+          </tr>
+          <tr>
+            <td class="tg-hmp3">Whatever 2.0</td>
+            <td class="tg-hmp3">Cool Box</td>
+            <td class="tg-hmp3"></td>
+            <td class="tg-baqh">*countdown*</td>
+            <td class="tg-baqh"></td>
+          </tr>
+          <tr>
+            <td class="tg-hmp3">I have a note to write something about yay</td>
+            <td class="tg-hmp3">ANOTHER BOX</td>
+            <td class="tg-hmp3"></td>
+            <td class="tg-baqh">*results button*</td>
+            <td class="tg-baqh"></td>
+          </tr>
+          <tr>
+            <td class="tg-hmp3">I don't really have much to say, ya know?</td>
+            <td class="tg-hmp3">Wow, what a box?</td>
+            <td class="tg-hmp3"></td>
+            <td class="tg-baqh">*countdown*</td>
+            <td class="tg-baqh"></td>
+          </tr>
+        </table>
+    </div>
     
     <footer>
         <p id="account-address"></p>
